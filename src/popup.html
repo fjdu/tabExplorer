@@ -13,11 +13,28 @@
         font-size: 100%;
       }
       .status {
-        /* avoid an excessively wide status text */
-        white-space: pre;
+        /*
+        white-space: normal;
         text-overflow: ellipsis;
-        overflow: visible;
-        max-width: 1400px;
+        overflow: visible;*/
+        font-size: 70%;
+      }
+      .searchBox {
+        width: 290px;
+      }
+      .tabInfo {
+        /* avoid an excessively wide status text */
+        width: 300px;;
+        /*height: 10%;*/
+        font-size: 70%;
+        display: flex;
+        align-items: center;
+      }
+      .tabInfo:hover{
+        /*background: rgba(250, 200, 0, 0.7);*/
+        border-style: solid;
+        border-width: 1px;
+        border-color: rgb(230,160,0);
       }
     </style>
 
@@ -27,11 +44,23 @@
       -
       - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
      -->
-    <script src="jquery.min.js"></script>
+    <!-- <script src="jquery.min.js"></script> -->
     <script src="popup.js"></script>
   </head>
   <body>
-    <div id="totalNum" class="status">Total num</div>
-    <div id="thisWindow" class="status">Num of this window</div>
+    <div class="status">
+        <table>
+        <tr>
+            <td> Number of tabs: </td>
+            <td> <div id="thisWindow"></div> </td>
+            <td>/</td>
+            <td> <div id="totalNum"></div> </td>
+        </tr>
+        </table>  
+    </div>
+    <input type="text" id="searchTab" class="searchBox" placeholder="Search tabs" autofocus value="" autocomplete="on"><br>
+    <div id="listContainerRecent"> </div>
+    <div id="separatorContainer"> <hr id="separator"> </div>
+    <div id="listContainer"> </div>
   </body>
 </html>
