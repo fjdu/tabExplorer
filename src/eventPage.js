@@ -148,30 +148,27 @@ function RingStore(n) {
 }
 
 
-
 // Test
-//var n = 15;
-//var ring = new RingStore(n);
-//for (var i=0; i<6; ++i) {
-//    ring.addItem(i);
-//}
-//for (var i=0; i<20; ++i) {
-//    ring.addItem(i*i);
-//}
-//ring.removeItem(49);
-//ring.removeItem(100);
-//ring.removeItem(225);
-//ring.removeItem(64);
-//ring.removeItem(36);
-//ring.removeItem(121);
-//ring.removeItem(81);
-//ring.addItem("A");
-//ring.addItem("B");
-//ring.addItem("C");
-//console.log(ring.data);
-//console.log(ring.iStart);
-//console.log(ring.iEnd);
-//console.log(ring.length);
+// var n = 5;
+// var ring = new RingStore(n);
+// ring.addItem(1);
+// ring.addItem(2);
+// ring.addItem(3);
+// ring.addItem(4);
+// ring.addItem(5);
+// ring.addItem(6);
+// //ring.removeItem(49);
+// //ring.removeItem(100);
+// //ring.removeItem(225);
+// //ring.removeItem(64);
+// //ring.removeItem(36);
+// //ring.removeItem(121);
+// //ring.removeItem(81);
+// console.log(ring.data);
+// console.log(ring.flatten());
+// console.log(ring.iStart);
+// console.log(ring.iEnd);
+// console.log(ring.length);
 
 
 
@@ -189,16 +186,6 @@ function updateIcon(tabId, changeInfo, tab) {
         });
 }
 
-//function initTabList() {
-//    tabList = [];
-//    chrome.tabs.query({},
-//        function(tabs){
-//            var ntabs = tabs.length;
-//            for (tab in tabs) {
-//                tabList.push(tab.url, tab.title, tab.favIconUrl, tab.Loading, tab.incognito, tab.id, tab.index, tab.windowId, tab.active);
-//            }
-//        });
-//}
 
 function recordRecentTabs(activeInfo) {
     chrome.storage.local.get({"tabHistory": []},
