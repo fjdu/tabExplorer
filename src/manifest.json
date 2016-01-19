@@ -26,5 +26,15 @@
   "background": {
       "scripts": ["eventPage.js"],
       "persistent": false
+  },
+  "commands": {
+        "_execute_browser_action": {
+            "suggested_key": {
+              "windows": "Alt+T",
+              "mac": "Alt+T",
+              "chromeos": "Alt+T",
+              "linux": "Alt+T"
+            }
+          }
   }
 }

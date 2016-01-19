@@ -1,3 +1,9 @@
+searchStr_prev = null;
+
+nKeyDown = 0;
+
+tabChosen_now = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     chrome.tabs.query({currentWindow: true},
         function(tabs){
@@ -9,22 +15,42 @@ document.addEventListener('DOMContentLoaded', function() {
             var ntabs = tabs.length;
             document.getElementById("totalNum").innerHTML = ntabs.toString();
         });
+
     doSearch();
+
     document.getElementById("searchTab").addEventListener("keyup", doSearch);
-    document.getElementById("listContainer").addEventListener("click", gotoTab);
-    document.getElementById("listContainerRecent").addEventListener("click", gotoTab);
+    document.getElementById("listContainer").addEventListener("mousemove", onMouseMove);
+    document.getElementById("listContainerRecent").addEventListener("mousemove", onMouseMove);
+    document.getElementById("listContainer").addEventListener("click", processMouseClick);
+    document.getElementById("listContainerRecent").addEventListener("click", processMouseClick);
     //document.getElementById("listContainer").addEventListener('mousemove', processCapture);
 });
 
 
+function doSearch(e) {
 
-function doSearch() {
+    searchStr = document.getElementById("searchTab").value.toLowerCase();
+    if (searchStr == searchStr_prev) {
+        processKeyPress(e);
+        return;
+    }
+
+    searchStr_prev = searchStr;
+
+    nKeyDown = 0;
+    tabChosen_now = null;
+
+    tabList_hist = [];
+    tabList_other = [];
+    countHist = 0;
+    countOther = 0;
+
     chrome.tabs.query({},
         function(tabs){
             var max_length = 120;
             var max_title_length = 60;
 
-            var text_search_tokens = document.getElementById("searchTab").value.toLowerCase().split(" ");
+            var text_search_tokens = searchStr.split(" ");
             console.log(text_search_tokens);
 
             // Clear the previous tab list.
@@ -42,8 +68,6 @@ function doSearch() {
                     var listContainerRecent = document.getElementById("listContainerRecent");
 
                     var ntabs = tabs.length;
-
-                    var countHist = 0, countOther = 0;
 
                     for (var i=ntabs-1; i>=0; --i) {
                         var thisTab = tabs[i];
@@ -113,11 +137,14 @@ function doSearch() {
                         if (inHistory) {
                             listContainerRecent.appendChild(div);
                             countHist += 1;
+                            tabList_hist.push(div);
                         } else {
                             listContainer.appendChild(div);
                             countOther += 1;
+                            tabList_other.push(div);
                         }
                     }
+
                     var separator = document.getElementById("separator");
                     if ((countHist > 0) && (countOther > 0)) {
                         if (!separator) {
@@ -126,14 +153,84 @@ function doSearch() {
                             document.getElementById("separatorContainer").appendChild(separator);
                         }
                     } else {
-                        separator.parentNode.removeChild(separator);
+                        if (separator) {
+                            separator.parentNode.removeChild(separator);
+                        }
                     }
                 });
         });
 }
 
 
-function gotoTab() {
+
+function processKeyPress(e) {
+    var key = e.which || e.keyCode;
+    var DOWN = 40, UP = 38, ENTER = 13;
+
+    if (key == ENTER) {
+
+        if ((countHist + countOther) == 0) {
+            return;
+        }
+
+        if (tabChosen_now == null) {
+            var iDiv = nKeyDown;
+            nKeyDown = 0;
+            if (iDiv > 0) {
+                iDiv -= 1;
+            }
+            if (iDiv < countHist) {
+                tabChosen_now = tabList_hist[iDiv];
+            } else {
+                iDiv -= countHist;
+                tabChosen_now = tabList_other[iDiv];
+            }
+        }
+        chrome.tabs.update(tabChosen_now.value[0], {active: true});
+        chrome.windows.update(tabChosen_now.value[1], {focused: true});
+        return;
+    }
+
+    var updown = false;
+    if (key == DOWN) {
+        updown = true;
+        nKeyDown += 1;
+    } else if (key == UP) {
+        updown = true;
+        nKeyDown -= 1;
+    }
+
+    if (updown) {
+        if (nKeyDown < 0) {
+            nKeyDown += (countHist + countOther + 1);
+        }
+        if (nKeyDown > (countHist + countOther)) {
+            nKeyDown -= (countHist + countOther);
+        }
+        if (nKeyDown == 0) {
+            nKeyDown = countHist + countOther;
+        }
+        var iDiv = nKeyDown - 1;
+        var chosenTab;
+        if (iDiv < countHist) {
+            chosenTab = tabList_hist[iDiv];
+        } else {
+            chosenTab = tabList_other[iDiv-countHist];
+        }
+    console.log(nKeyDown, iDiv, countHist, countOther);
+
+        if (tabChosen_now != null) {
+            unHighlightTab(tabChosen_now);
+        }
+        tabChosen_now = chosenTab;
+
+        highlightTab(chosenTab);
+        chosenTab.scrollIntoView(false);
+    }
+}
+
+
+function getTabAtPointer() {
     var x = event.clientX,
         y = event.clientY,
         elementMouseIsOver = document.elementFromPoint(x, y);
@@ -145,12 +242,44 @@ function gotoTab() {
     } else {
         chosenNode = false;
     }
+    return chosenNode;
+}
+
+
+function processMouseClick() {
+    var chosenNode = getTabAtPointer();
     if (chosenNode) {
         chrome.tabs.update(chosenNode.value[0], {active: true});
         chrome.windows.update(chosenNode.value[1], {focused: true});
     }
 }
 
+
+function onMouseMove() {
+    var chosenNode = getTabAtPointer();
+    if (chosenNode) {
+        if (tabChosen_now != null) {
+            if (tabChosen_now != chosenNode){
+                unHighlightTab(tabChosen_now);
+                tabChosen_now = chosenNode;
+                highlightTab(chosenNode);
+            }
+        } else {
+            tabChosen_now = chosenNode;
+        }
+    }
+}
+
+
+function highlightTab(t) {
+    t.style.borderWidth = "1px";
+    t.style.borderStyle = "solid";
+    t.style.borderColor = "rgb(230,160,0)";
+}
+
+function unHighlightTab(t) {
+    t.style.borderWidth = "0px";
+}
 
 /*
 function processCapture(e) {

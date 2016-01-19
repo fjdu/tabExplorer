@@ -11,6 +11,7 @@
       body {
         font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
         font-size: 100%;
+        width: 300px;
       }
       .status {
         /*
@@ -18,24 +19,42 @@
         text-overflow: ellipsis;
         overflow: visible;*/
         font-size: 70%;
+        width: 300px;
+      }
+      .header {
+        top: 0px;
+        position: fixed;
+        z-index: 100;
+        display: block;
+        padding-left: 0;
+        padding-right: 0;
+        background-color: #ffffff;
+        opacity: 1.0;
+      }
+      .results {
+        position: relative;
+        padding-top: 40px;
+        padding-bottom: 1px;
+        display: block;
       }
       .searchBox {
-        width: 290px;
+        width: 295px;
       }
       .tabInfo {
-        /* avoid an excessively wide status text */
         width: 300px;;
         /*height: 10%;*/
         font-size: 70%;
         display: flex;
         align-items: center;
       }
+      /*
       .tabInfo:hover{
-        /*background: rgba(250, 200, 0, 0.7);*/
+        //background: rgba(250, 200, 0, 0.7);
         border-style: solid;
         border-width: 1px;
         border-color: rgb(230,160,0);
       }
+      */
     </style>
 
     <!--
@@ -48,6 +67,8 @@
     <script src="popup.js"></script>
   </head>
   <body>
+
+  <header class="header">
     <div class="status">
         <table>
         <tr>
@@ -59,8 +80,13 @@
         </table>  
     </div>
     <input type="text" id="searchTab" class="searchBox" placeholder="Search tabs" autofocus value="" autocomplete="on"><br>
+  </header>
+
+  <results class="results">
     <div id="listContainerRecent"> </div>
     <div id="separatorContainer"> <hr id="separator"> </div>
     <div id="listContainer"> </div>
+  </results>
+
   </body>
 </html>
