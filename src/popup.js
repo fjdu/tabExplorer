@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("listContainerRecent").addEventListener("mousemove", onMouseMove);
     document.getElementById("listContainer").addEventListener("click", processMouseClick);
     document.getElementById("listContainerRecent").addEventListener("click", processMouseClick);
+    document.getElementById("bookmarkAll").addEventListener("click", bookmarkAll);
     //document.getElementById("listContainer").addEventListener('mousemove', processCapture);
 });
 
@@ -303,3 +304,64 @@ function drawCapture(dataUrl) {
     imgCap.src = dataUrl;
 }
 */
+
+function bookmarkAll() {
+  chrome.bookmarks.getTree(function (arr_) {
+    console.log(arr_);
+    var title_TabExplorerBookmarks = 'TabExplorerBookmarks';
+    var id_TabExplorerBookmarks_list = [];
+    var arr = arr_[0].children;
+    var id_other = -1;
+    for (const i in arr) {
+      if (arr[i]['title'] != 'Other Bookmarks') {
+        continue;
+      } else {
+        var dir_other = arr[i].children;
+        id_other = arr[i].id;
+        for (const j in dir_other) {
+          if (dir_other[j]['title'] != title_TabExplorerBookmarks) {
+            continue;
+          } else {
+            id_TabExplorerBookmarks_list.push(dir_other[j].id);
+          }
+        }
+        for (var j =0; j<id_TabExplorerBookmarks_list.length; ++j) {
+          if (id_TabExplorerBookmarks_list[j] != -1) {
+            chrome.bookmarks.removeTree(id_TabExplorerBookmarks_list[j]);
+          }
+        }
+        chrome.bookmarks.create({'parentId': id_other,
+                                 'title': title_TabExplorerBookmarks
+                                }, function(newfolder){
+          console.log("added folder: " + newfolder.title);
+          add_windows_to_folder(newfolder.id);
+        });
+        break;
+      }
+    }
+  });
+}
+
+
+function add_windows_to_folder(id) {
+  chrome.windows.getAll({'populate': true, 'windowTypes': ['normal']},
+    function(windows) {
+      nwindows = windows.length;
+      console.log(nwindows);
+      for (let i=0; i<nwindows; ++i) {
+        let tabs = windows[i].tabs;
+        let ntabs = tabs.length;
+        chrome.bookmarks.create({'parentId': id,
+                                 'title': 'Window' + i.toString()
+                                }, function(newfolder){
+          for (var j=0; j<ntabs; ++j) {
+            chrome.bookmarks.create({'parentId': newfolder.id,
+                                     'title': tabs[j].title,
+                                     'url': tabs[j].url
+                                    });
+          }
+        });
+      }
+    }
+  );
+}
